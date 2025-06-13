@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ecqare-Style Begeleidingsapp</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin:0; padding:0; background:#f5f7fa; color:#2c3e50;
+    display:flex; flex-direction: column; height: 100vh;
+  }
+  header {
+    background:#2f4050; color:#fff; padding: 15px 20px;
+    font-size: 1.5em; font-weight: bold;
+  }
+  #clientBar {
+    background: #fff;
+    display: flex; overflow-x: auto; padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  #clientBar button {
+    background: #e7eaf1;
+    border: none; margin-right: 10px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 110px;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #34495e;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+    transition: background 0.3s;
+  }
+  #clientBar button.selected,
+  #clientBar button:hover {
+    background: #4a90e2;
+    color: #fff;
+  }
+  main {
+    flex: 1; display: flex; overflow: hidden;
+    background: #fff;
+  }
+  #clientDetails {
+    flex: 1 1 50%;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+  }
+  #dashboardTasks {
+    flex: 1 1 50%;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+    color: #34495e;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+  }
+  input[type=text], textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    resize: vertical;
+  }
+  ul.medication-list, ul.task-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 10px;
+  }
+  ul.medication-list li, ul.task-list li {
+    padding: 8px 10px;
+    background: #f0f3f7;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  ul.medication-list li label, ul.task-list li label {
+    flex: 1;
+    cursor: pointer;
+  }
+  ul.medication-list li input[type=checkbox], ul.task-list li input[type=checkbox] {
+    margin-right: 10px;
+    transform: scale(1.2);
+  }
+  button {
+    background: #4a90e2;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1em;
+  }
+  button:hover {
+    background: #357ABD;
+  }
+  textarea#diary {
+    min-height: 120px;
+  }
+  #notes {
+    font-style: italic;
+    background: #f8f9fb;
+    border: 1px solid #d1d7e0;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+  /* Scrollbar styling for clientBar */
+  #clientBar::-webkit-scrollbar {
+    height: 8px;
+  }
+  #clientBar::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 4px;
+  }
+  #clientBar::-webkit-scrollbar-track {
+    background: #eaeef4;
+  }
+  /* Responsive smaller screens */
+  @media(max-width: 700px) {
+    main {
+      flex-direction: column;
+    }
+    #clientDetails, #dashboardTasks {
+      flex: 1 1 auto;
+      height: 50vh;
+      border-right: none;
+      border-bottom: 1px solid #ddd;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>Ecqare Begeleidingsapp</header>
+
+<div id="clientBar"></div>
+
+<main>
+  <section id="clientDetails" aria-label="Cliënt dossier">
+    <h2>Cliënt dossier</h2>
+    <div id="clientInfo">
+      <p><strong>Naam:</strong> <span id="clientNameDisplay">--</span></p>
+      <p><strong>Notities:</strong> <div id="clientNotes" style="white-space:pre-wrap; background:#f9fafb; padding:8px; border-radius:4px; min-height:40px;">--</div></p>
+
+      <label>Medicatieplan</label>
+      <ul class="medication-list" id="medicationList"></ul>
+      <input type="text" id="newMedInput" placeholder="Nieuwe medicatie..." />
+      <button id="addMedBtn">Medicatie toevoegen</button>
+
+      <label for="diary">Begeleidersdagboek</label>
+      <textarea id="diary" placeholder="Notities per cliënt..."></textarea>
+      <button id="saveDiaryBtn">Opslaan dagboek</button>
+    </div>
+  </section>
+
+  <section id="dashboardTasks" aria-label="Taken voor vandaag">
+    <h2>Taken vandaag</h2>
+    <ul class="task-list" id="todayTasksList"></ul>
+
+    <label for="newTaskInput">Nieuwe taak toevoegen</label>
+    <input type="text" id="newTaskInput" placeholder="Taakomschrijving..." />
+    <button id="addTaskBtn">Taak toevoegen</button>
+  </section>
+</main>
+
+<script>
+  // Data structuur in localStorage: clients = [{name, notes, medication:[{name, done}], diary}], tasks = [{desc, done, date, client}]
+  let clients = JSON.parse(localStorage.getItem('clients') || '[]');
+  let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+  // UI refs
+  const clientBar = document.getElementById('clientBar');
+  const clientNameDisplay = document.getElementById('clientNameDisplay');
+  const clientNotesDiv = document.getElementById('clientNotes');
+  const medicationListUl = document.getElementById('medicationList');
+  const diaryTextarea = document.getElementById('diary');
+  const saveDiaryBtn = document.getElementById('saveDiaryBtn');
+  const newMedInput = document.getElementById('newMedInput');
+  const addMedBtn = document.getElementById('addMedBtn');
+
+  const todayTasksList = document.getElementById('todayTasksList');
+  const newTaskInput = document.getElementById('newTaskInput');
+  const addTaskBtn = document.getElementById('addTaskBtn');
+
+  let selectedClientIndex = -1;
+
+  // Save to localStorage
+  function saveAll() {
+    localStorage.setItem('clients', JSON.stringify(clients));
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  // Render client buttons
+  function renderClientBar() {
+    clientBar.innerHTML = '';
+    clients.forEach((client,i) => {
+      const btn = document.createElement('button');
+      btn.textContent = client.name;
+      if(i === selectedClientIndex) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        selectedClientIndex = i;
+        renderClientBar();
+        renderClientDetails();
+        renderTodayTasks();
+      });
+      clientBar.appendChild(btn);
+    });
+    // If no clients, show a message button to add one
+    if(clients.length === 0) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Nieuwe cliënt toevoegen';
+      btn.addEventListener('click', () => {
+        const newName = prompt('Naam nieuwe cliënt?');
+        if(newName) {
+          clients.push({name: newName, notes:'', medication:[], diary:''});
+          selectedClientIndex = clients.length -1;
+          saveAll();
+          renderClientBar();
+          renderClientDetails();
+          renderTodayTasks();
+        }
+      });
+      clientBar.appendChild(btn);
+    }
+  }
+
+  // Render selected client dossier
+  function renderClientDetails() {
+    if(selectedClientIndex < 0 || !clients[selectedClientIndex]) {
+      clientNameDisplay.textContent = '--';
+      clientNotesDiv.textContent = '--';
+      medicationListUl.innerHTML = '';
+      diaryTextarea.value = '';
+      saveDiaryBtn.disabled = true;
+      addMedBtn.disabled = true;
+      newMedInput.disabled = true;
+      return;
+    }
+    const client = clients[selectedClientIndex];
+    clientNameDisplay.textContent = client.name;
+    clientNotesDiv.textContent = client.notes || '--';
+
+    medicationListUl.innerHTML = '';
+    client.medication.forEach((med,i) => {
+      const li = document.createElement('li');
+      const idChk = `medchk_${i}`;
+      li.innerHTML = `
+        <label for="${idChk}">
+          <input type="checkbox" id="${idChk}" ${med.done ? 'checked' : ''} />
+          ${med.name}
+        </label>
+        <button title="Verwijder medicatie">&#10006;</button>
+      `;
+      // Checkbox toggle done
+      li.querySelector('input[type=checkbox]').addEventListener('change', (e) => {
+        med.done = e.target.checked;
+        saveAll();
+      });
+      // Remove med
+      li.querySelector('button').addEventListener('click', () => {
+        if(confirm(`Medicatie "${med.name}" verwijderen?`)) {
+          client.medication.splice(i,1);
+          saveAll();
+          renderClientDetails();
+        }
+      });
+      medicationListUl.appendChild(li);
+    });
+
+    diaryTextarea.value = client.diary || '';
+    saveDiaryBtn.disabled = false;
+    addMedBtn.disabled = false;
+    newMedInput.disabled = false;
+  }
+
+  // Add medication
+  addMedBtn.addEventListener('click', () => {
+    const val = newMedInput.value.trim();
+    if(val === '' || selectedClientIndex < 0) return;
+    clients[selectedClientIndex].medication.push({name: val, done: false});
+    newMedInput.value = '';
+    saveAll();
+    renderClientDetails();
+  });
+
+  // Save diary button
+  saveDiaryBtn.addEventListener('click', () => {
+    if(selectedClientIndex < 0) return alert('Geen cliënt geselecteerd');
+    clients[selectedClientIndex].diary = diaryTextarea.value.trim();
+    saveAll();
+    alert('Dagboek opgeslagen');
+  });
+
+  // Render today's tasks (all clients)
+  function renderTodayTasks() {
+    todayTasksList.innerHTML = '';
+    const todayStr = new Date().toISOString().slice(0,10);
+    const todayTasks = tasks.filter(t => t.date === todayStr);
+    if(todayTasks.length === 0) {
+      todayTasksList.innerHTML = '<li>Geen taken voor vandaag</li>';
+      return;
+    }
+    todayTasks.forEach((task,i) => {
+      const li = document.createElement('li');
+      const idChk = `taskchk_${i}`;
+      li.innerHTML = `
+        <label for="${idChk}" title="Cliënt: ${task.client}">
+          <input type="checkbox" id="${idChk}" ${task.done ? 'checked' : ''} />
+          [${task.client}] ${task.desc}
+        </label>
+        <button title="Verwijder taak">&#10006;</button>
+      `;
+      // Checkbox toggle done
+      li.querySelector('input[type=checkbox]').addEventListener('change', (e) => {
+        task.done = e.target.checked;
+        saveAll();
+      });
+      // Remove task
+      li.querySelector('button').addEventListener('click', () => {
+        if(confirm(`Taak "${task.desc}" verwijderen?`)) {
+          tasks.splice(i,1);
+          saveAll();
+          renderTodayTasks();
+        }
+      });
+      todayTasksList.appendChild(li);
+    });
+  }
+
+  // Add task button
+  addTaskBtn.addEventListener('click', () => {
+    const val = newTaskInput.value.trim();
+    if(val === '') return alert('Voer een taakomschrijving in');
+    if(selectedClientIndex < 0) return alert('Selecteer eerst een cliënt');
+    const todayStr = new Date().toISOString().slice(0,10);
+    tasks.push({desc: val, done: false, date: todayStr, client: clients[selectedClientIndex].name});
+    newTaskInput.value = '';
+    saveAll();
+    renderTodayTasks();
+  });
+
+  // Init rendering
+  renderClientBar();
+  renderClientDetails();
+  renderTodayTasks();
+
+</script>
+
+</body>
+</html>
