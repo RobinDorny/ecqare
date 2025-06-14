@@ -2,45 +2,71 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Ecqare Begeleidingsapp</title>
 <style>
   body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-  header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-  #clientBar { background: #ecf0f1; padding: 10px; display: flex; overflow-x: auto; gap: 10px; }
-  #clientBar button { padding: 10px 15px; border: none; border-radius: 5px; background: #bdc3c7; cursor: pointer; transition: 0.3s; }
-  #clientBar button.selected { background: #3498db; color: white; }
-
+  header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #clientBar {
+    background: #ecf0f1;
+    padding: 10px;
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+  }
+  #clientBar button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background: #bdc3c7;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+  }
+  #clientBar button.selected {
+    background: #3498db;
+    color: white;
+  }
   main {
     max-width: 900px;
     margin: 20px auto 40px;
     background: white;
     padding: 25px 35px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 25px;
   }
-
-  /* Dashboard taken over 2 kolommen */
+  /* Taken vandaag over beide kolommen */
   #dashboardTaken {
     grid-column: 1 / 3;
-    background: #eaf6ff;
+    background: #dff0d8;
+    padding: 10px 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgb(34 114 217 / 0.15);
-    padding: 15px 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-
-  /* Linker kolom: dossier en dagboek */
+  section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  /* Links: dossier en dagboek */
   #sectionNotes {
     grid-column: 1 / 2;
   }
   #sectionDiary {
     grid-column: 1 / 2;
   }
-
-  /* Rechter kolom: medicatie, taken, activiteiten */
+  /* Rechts: medicatie, taken, activiteiten */
   #sectionMedication {
     grid-column: 2 / 3;
   }
@@ -50,18 +76,52 @@
   #sectionActivities {
     grid-column: 2 / 3;
   }
-
-  section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  textarea, input[type=text], input[type=datetime-local] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    font-family: inherit;
   }
-  textarea, input[type=text], input[type=datetime-local] { width: 100%; padding: 10px; margin-top: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
-  button { cursor: pointer; }
-  h3 { margin-bottom: 10px; }
-  .list { margin-top: 10px; }
-  .list li { margin-bottom: 6px; }
+  button {
+    cursor: pointer;
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background: #2980b9;
+  }
+  h3 {
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+  .list {
+    margin-top: 10px;
+    list-style-type: none;
+    padding-left: 0;
+  }
+  .list li {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    color: #444;
+  }
+  .list li label {
+    cursor: pointer;
+  }
+  .list li input[type=checkbox] {
+    margin-right: 8px;
+    transform: scale(1.1);
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -117,6 +177,7 @@
     const app = document.getElementById('app');
     const client = clients[selectedClient];
 
+    // Taken vandaag van alle cliënten die niet gedaan zijn
     const takenVandaag = clients.flatMap((c) =>
       (c.tasks || []).filter(t => !t.done).map(t => `• ${c.name}: ${t.name}`)
     );
@@ -143,14 +204,20 @@
 
         <section id="sectionDiary">
           <h3>Begeleidersdagboek</h3>
-          <textarea id="diaryText">${client.diary || ''}</textarea>
+          <textarea id="diaryText" placeholder="Schrijf hier je dagboek...">${client.diary || ''}</textarea>
           <button onclick="saveDiary()">Opslaan</button>
         </section>
 
         <section id="sectionMedication">
           <h3>Medicatieplan</h3>
           <ul class="list" id="medList">
-            ${(client.medication || []).map((m, i) => `<li><input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMed(${i})"> ${m.name}</li>`).join('')}
+            ${(client.medication || []).map((m, i) => `
+              <li>
+                <label>
+                  <input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMed(${i})" />
+                  ${m.name}
+                </label>
+              </li>`).join('')}
           </ul>
           <input type="text" id="newMed" placeholder="Medicatie toevoegen" />
           <button onclick="addMed()">Toevoegen</button>
@@ -159,7 +226,13 @@
         <section id="sectionTasks">
           <h3>Takenlijst</h3>
           <ul class="list" id="taskList">
-            ${(client.tasks || []).map((t, i) => `<li><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})"> ${t.name}</li>`).join('')}
+            ${(client.tasks || []).map((t, i) => `
+              <li>
+                <label>
+                  <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" />
+                  ${t.name}
+                </label>
+              </li>`).join('')}
           </ul>
           <input type="text" id="newTask" placeholder="Taak toevoegen" />
           <button onclick="addTask()">Toevoegen</button>
@@ -249,6 +322,7 @@
     document.getElementById('activityTime').value = '';
   }
 
+  // Start app
   if (!userLoggedIn) {
     renderLogin();
   } else {
