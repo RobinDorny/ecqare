@@ -184,11 +184,12 @@
     clients[selectedClient].tasks.push({ name: val, done: false });
     saveClients();
     renderApp();
-    // Scroll naar takenlijst
-    const taskSection = document.getElementById('tasksSection');
-    if (taskSection) {
-      taskSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    setTimeout(() => {
+      const taskSection = document.getElementById('tasksSection');
+      if (taskSection) {
+        taskSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 0);
   }
 
   function toggleTask(index) {
@@ -216,3 +217,4 @@
 </script>
 </body>
 </html>
+
