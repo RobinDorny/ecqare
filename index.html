@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ecqare Begeleidingsapp</title>
+<title>Ecqare</title>
 <style>
   body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
   header {
@@ -99,6 +99,8 @@
     margin-top: 10px;
     list-style-type: none;
     padding-left: 0;
+    max-height: 200px;
+    overflow-y: auto;
   }
   .list li {
     margin-bottom: 6px;
@@ -107,6 +109,7 @@
   }
   .list li label {
     cursor: pointer;
+    user-select: none;
   }
   .list li input[type=checkbox] {
     margin-right: 8px;
@@ -161,13 +164,12 @@
   }
 
   function renderApp() {
-    if (!clients[selectedClient]) {
-      selectedClient = 0;
-    }
+    if (!clients[selectedClient]) selectedClient = 0;
     ensureClient(selectedClient);
     const app = document.getElementById('app');
     const client = clients[selectedClient];
 
+    // Taken vandaag: alle openstaande taken van alle cliënten
     const takenVandaag = clients.flatMap(c =>
       (c.tasks || []).filter(t => !t.done).map(t => `• ${c.name}: ${t.name}`)
     );
@@ -247,13 +249,8 @@
     `;
   }
 
-  function selectClient(index) {
-    selectedClient = index;
-    renderApp();
-  }
-
   function addClient() {
-    const name = prompt('Naam van cliënt?');
+    const name = prompt("Naam nieuwe cliënt:");
     if (name) {
       clients.push({ name, diary: '', notes: '', medication: [], tasks: [], activities: [] });
       selectedClient = clients.length - 1;
@@ -262,73 +259,96 @@
     }
   }
 
-  function saveDiary() {
-    const text = document.getElementById('diaryText').value;
-    ensureClient(selectedClient);
-    clients[selectedClient].diary = text;
-    clients[selectedClient].notes = text;
-    saveClients();
-    alert('Dagboek opgeslagen');
+  function selectClient(i) {
+    selectedClient = i;
     renderApp();
   }
 
-  function toggleMed(index) {
-    ensureClient(selectedClient);
-    clients[selectedClient].medication[index].done = !clients[selectedClient].medication[index].done;
+  function saveDiary() {
+    const text = document.getElementById('diaryText').value.trim();
+    clients[selectedClient].diary = text;
     saveClients();
-    renderApp();
+    alert('Dagboek opgeslagen');
   }
 
   function addMed() {
-    const val = document.getElementById('newMed').value.trim();
-    if (!val) return;
-    ensureClient(selectedClient);
-    clients[selectedClient].medication.push({ name: val, done: false });
+    const medInput = document.getElementById('newMed');
+    const medName = medInput.value.trim();
+    if (!medName) {
+      alert('Voer een medicatie in');
+      return;
+    }
+    clients[selectedClient].medication.push({ name: medName, done: false });
+    medInput.value = '';
     saveClients();
     renderApp();
-    document.getElementById('newMed').value = '';
+    scrollToSection('sectionMedication');
   }
 
-  function toggleTask(index) {
-    ensureClient(selectedClient);
-    clients[selectedClient].tasks[index].done = !clients[selectedClient].tasks[index].done;
+  function toggleMed(i) {
+    clients[selectedClient].medication[i].done = !clients[selectedClient].medication[i].done;
     saveClients();
     renderApp();
   }
 
   function addTask() {
-    const val = document.getElementById('newTask').value.trim();
-    if (!val) return;
-    ensureClient(selectedClient);
-    clients[selectedClient].tasks.push({ name: val, done: false });
+    const taskInput = document.getElementById('newTask');
+    const taskName = taskInput.value.trim();
+    if (!taskName) {
+      alert('Voer een taak in');
+      return;
+    }
+    clients[selectedClient].tasks.push({ name: taskName, done: false });
+    taskInput.value = '';
     saveClients();
     renderApp();
-    document.getElementById('newTask').value = '';
+    scrollToSection('sectionTasks');
   }
 
-  function toggleActivity(index) {
-    ensureClient(selectedClient);
-    clients[selectedClient].activities[index].done = !clients[selectedClient].activities[index].done;
+  function toggleTask(i) {
+    clients[selectedClient].tasks[i].done = !clients[selectedClient].tasks[i].done;
     saveClients();
     renderApp();
   }
 
   function addActivity() {
-    const name = document.getElementById('newActivity').value.trim();
-    const datetime = document.getElementById('activityTime').value;
-    if (!name || !datetime) return;
-    ensureClient(selectedClient);
+    const actNameInput = document.getElementById('newActivity');
+    const actTimeInput = document.getElementById('activityTime');
+    const name = actNameInput.value.trim();
+    const datetime = actTimeInput.value;
+    if (!name) {
+      alert('Voer een activiteit in');
+      return;
+    }
+    if (!datetime) {
+      alert('Kies een datum en tijd');
+      return;
+    }
     clients[selectedClient].activities.push({ name, datetime, done: false });
+    actNameInput.value = '';
+    actTimeInput.value = '';
     saveClients();
     renderApp();
-    document.getElementById('newActivity').value = '';
-    document.getElementById('activityTime').value = '';
+    scrollToSection('sectionActivities');
   }
 
-  if (!userLoggedIn) {
-    renderLogin();
-  } else {
+  function toggleActivity(i) {
+    clients[selectedClient].activities[i].done = !clients[selectedClient].activities[i].done;
+    saveClients();
     renderApp();
+  }
+
+  function scrollToSection(id) {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  if (userLoggedIn) {
+    renderApp();
+  } else {
+    renderLogin();
   }
 </script>
 </body>
