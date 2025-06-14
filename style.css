@@ -1,0 +1,54 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background: #f4f6f9;
+}
+header {
+  background: #2c3e50;
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+#clientBar {
+  background: #ecf0f1;
+  padding: 10px;
+  overflow-x: auto;
+  display: flex;
+  gap: 10px;
+}
+#clientBar button {
+  background: #bdc3c7;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#clientBar button.selected {
+  background: #3498db;
+  color: white;
+}
+main {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+}
+ul.list {
+  list-style: none;
+  padding: 0;
+}
+ul.list li {
+  margin-bottom: 8px;
+}
