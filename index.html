@@ -2,48 +2,193 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ecqare Begeleidingsapp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ecqare Begeleidingsapp - Replica</title>
 <style>
-  body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-  header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-  #clientBar { background: #ecf0f1; padding: 10px; display: flex; overflow-x: auto; gap: 10px; }
-  #clientBar button { padding: 10px 15px; border: none; border-radius: 5px; background: #bdc3c7; cursor: pointer; transition: 0.3s; }
-  #clientBar button.selected { background: #3498db; color: white; }
-  main { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 900px; margin: auto; }
-  section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-  textarea, input[type=text], input[type=datetime-local] { width: 100%; padding: 10px; margin-top: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
-  button { cursor: pointer; background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; transition: background 0.3s; }
-  button:hover { background: #2980b9; }
-  h3 { margin-bottom: 10px; }
-  .list { margin-top: 10px; list-style-type: none; padding-left: 0; }
-  .list li { margin-bottom: 6px; }
-  .dashboard-taken { background: #dff0d8; padding: 10px; border-radius: 8px; }
-  input[type=checkbox] { transform: scale(1.2); margin-right: 8px; vertical-align: middle; }
+  body {
+    margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+  }
+  header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  #clientBar {
+    background: #ecf0f1;
+    padding: 10px 15px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+  }
+  #clientBar button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    background: #bdc3c7;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 0.3s;
+  }
+  #clientBar button.selected {
+    background: #3498db;
+    color: white;
+  }
+  #clientBar button:hover:not(.selected) {
+    background: #a5abb1;
+  }
+  main {
+    max-width: 900px;
+    margin: 20px auto 40px;
+    padding: 0 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgb(0 0 0 / 0.1);
+    padding: 20px;
+  }
+  h3 {
+    margin-top: 0;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+  .list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 10px;
+  }
+  .list li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  .list li label {
+    cursor: pointer;
+    flex-grow: 1;
+  }
+  input[type="checkbox"] {
+    transform: scale(1.3);
+    margin-right: 12px;
+  }
+  input[type="text"], input[type="datetime-local"], textarea {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-family: inherit;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    resize: vertical;
+  }
+  textarea {
+    min-height: 80px;
+  }
+  button {
+    background: #3498db;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    user-select: none;
+  }
+  button:hover {
+    background: #2980b9;
+  }
+  /* Scrollbar for client bar */
+  #clientBar::-webkit-scrollbar {
+    height: 6px;
+  }
+  #clientBar::-webkit-scrollbar-track {
+    background: #ecf0f1;
+  }
+  #clientBar::-webkit-scrollbar-thumb {
+    background-color: #bdc3c7;
+    border-radius: 3px;
+  }
+  /* Login styles */
+  #loginMain {
+    max-width: 400px;
+    margin: 120px auto;
+    background: white;
+    padding: 30px 25px 35px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+    text-align: center;
+  }
+  #loginMain input {
+    font-size: 1.1rem;
+  }
+  #logoutBtn {
+    background: #e74c3c;
+  }
+  #logoutBtn:hover {
+    background: #c0392b;
+  }
+  .dashboard-taken ul {
+    padding-left: 18px;
+  }
 </style>
 </head>
 <body>
+
 <div id="app"></div>
 
 <script>
+  // --- Data and state ---
   let userLoggedIn = localStorage.getItem('loggedIn') === 'true';
   let clients = JSON.parse(localStorage.getItem('clients') || '[]');
   let selectedClient = 0;
 
+  // --- Helper to save ---
   function saveClients() {
     localStorage.setItem('clients', JSON.stringify(clients));
   }
 
+  // --- Ensure client exists ---
+  function ensureClient(index) {
+    if (!clients[index]) {
+      clients[index] = {
+        name: 'Onbekend',
+        diary: '',
+        notes: '',
+        medication: [],
+        tasks: [],
+        activities: []
+      };
+      saveClients();
+    }
+  }
+
+  // --- Render login screen ---
   function renderLogin() {
     document.getElementById('app').innerHTML = `
-      <main style="max-width:400px;margin:100px auto;text-align:center">
+      <main id="loginMain">
         <h2>Inloggen</h2>
         <input type="password" id="password" placeholder="Wachtwoord" />
+        <br />
         <button onclick="login()">Login</button>
       </main>
     `;
   }
 
+  // --- Login ---
   function login() {
     const pwd = document.getElementById('password').value;
     if (pwd === 'zorg') {
@@ -55,60 +200,65 @@
     }
   }
 
+  // --- Logout ---
   function logout() {
     localStorage.setItem('loggedIn', 'false');
     location.reload();
   }
 
-  function ensureClient(index) {
-    if (!clients[index]) {
-      clients[index] = { name: 'Onbekend', diary: '', notes: '', medication: [], tasks: [], activities: [] };
-      saveClients();
-    }
-  }
-
+  // --- Render main app ---
   function renderApp() {
-    if (!clients[selectedClient]) {
-      selectedClient = 0;
-    }
+    if (!clients[selectedClient]) selectedClient = 0;
     ensureClient(selectedClient);
     const app = document.getElementById('app');
     const client = clients[selectedClient];
 
-    const takenVandaag = clients.flatMap((c, ci) =>
+    // Taken van alle cliënten open (done==false)
+    const takenVandaag = clients.flatMap(c =>
       (c.tasks || []).filter(t => !t.done).map(t => `• ${c.name}: ${t.name}`)
     );
 
     app.innerHTML = `
       <header>
         <div>Ecqare Begeleiding</div>
-        <button onclick="logout()">Uitloggen</button>
+        <button id="logoutBtn" onclick="logout()">Uitloggen</button>
       </header>
+
       <div id="clientBar">
         <button onclick="addClient()">+ Nieuwe Cliënt</button>
-        ${clients.map((c, i) => `<button class="${i === selectedClient ? 'selected' : ''}" onclick="selectClient(${i})">${c.name}</button>`).join('')}
+        ${clients.map((c, i) => `
+          <button class="${i === selectedClient ? 'selected' : ''}" onclick="selectClient(${i})">${c.name}</button>
+        `).join('')}
       </div>
+
       <main>
         <section class="dashboard-taken">
-          <h3>Taken vandaag per cliënt</h3>
+          <h3>Taken vandaag (openstaand)</h3>
           ${takenVandaag.length ? `<ul>${takenVandaag.map(t => `<li>${t}</li>`).join('')}</ul>` : '<p>Geen openstaande taken</p>'}
         </section>
 
         <section>
           <h3>Dossier: ${client.name}</h3>
-          <p><strong>Notities:</strong><br>${client.notes || 'Geen notities'}</p>
+          <p><strong>Notities:</strong><br>${client.notes ? escapeHtml(client.notes).replace(/\n/g, '<br>') : 'Geen notities'}</p>
         </section>
 
         <section>
           <h3>Begeleidersdagboek</h3>
-          <textarea id="diaryText">${client.diary || ''}</textarea>
+          <textarea id="diaryText" placeholder="Dagboeknotities...">${client.diary || ''}</textarea>
           <button onclick="saveDiary()">Opslaan</button>
         </section>
 
         <section>
           <h3>Medicatieplan</h3>
           <ul class="list" id="medList">
-            ${(client.medication || []).map((m, i) => `<li><label><input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMed(${i})"> ${m.name}</label></li>`).join('')}
+            ${(client.medication || []).map((m, i) => `
+              <li>
+                <label>
+                  <input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMed(${i})" />
+                  ${escapeHtml(m.name)}
+                </label>
+              </li>
+            `).join('')}
           </ul>
           <input type="text" id="newMed" placeholder="Medicatie toevoegen" />
           <button onclick="addMed()">Toevoegen</button>
@@ -117,7 +267,14 @@
         <section id="tasksSection">
           <h3>Takenlijst</h3>
           <ul class="list" id="taskList">
-            ${(client.tasks || []).map((t, i) => `<li><label><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})"> ${t.name}</label></li>`).join('')}
+            ${(client.tasks || []).map((t, i) => `
+              <li>
+                <label>
+                  <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" />
+                  ${escapeHtml(t.name)}
+                </label>
+              </li>
+            `).join('')}
           </ul>
           <input type="text" id="newTask" placeholder="Taak toevoegen" />
           <button onclick="addTask()">Toevoegen</button>
@@ -126,7 +283,9 @@
         <section>
           <h3>Activiteiten</h3>
           <ul class="list" id="activityList">
-            ${(client.activities || []).map((a, i) => `<li>${a.name} - ${a.datetime}</li>`).join('')}
+            ${(client.activities || []).map((a, i) => `
+              <li>${escapeHtml(a.name)} — ${formatDateTime(a.datetime)}</li>
+            `).join('')}
           </ul>
           <input type="text" id="newActivity" placeholder="Activiteit" />
           <input type="datetime-local" id="activityTime" />
@@ -136,21 +295,55 @@
     `;
   }
 
-  function selectClient(index) {
-    selectedClient = index;
+  // --- Escape html to prevent XSS ---
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, function(m) {
+      return ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[m];
+    });
+  }
+
+  // --- Format datetime local string to readable NL date + time ---
+  function formatDateTime(dt) {
+    if (!dt) return '';
+    const d = new Date(dt);
+    if (isNaN(d)) return dt;
+    return d.toLocaleString('nl-NL', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  // --- Select client ---
+  function selectClient(i) {
+    selectedClient = i;
     renderApp();
   }
 
+  // --- Add new client ---
   function addClient() {
-    const name = prompt('Naam van cliënt?');
-    if (name) {
-      clients.push({ name, diary: '', notes: '', medication: [], tasks: [], activities: [] });
-      selectedClient = clients.length - 1;
+    const name = prompt('Naam van cliënt:');
+    if (name && name.trim()) {
+      clients.push({
+        name: name.trim(),
+        diary: '',
+        notes: '',
+        medication: [],
+        tasks: [],
+        activities: []
+      });
+      selectedClient = clients.length -1;
       saveClients();
       renderApp();
     }
   }
 
+  // --- Save diary and notes ---
   function saveDiary() {
     const text = document.getElementById('diaryText').value;
     ensureClient(selectedClient);
@@ -161,60 +354,72 @@
     renderApp();
   }
 
-  function toggleMed(index) {
+  // --- Toggle medication done ---
+  function toggleMed(i) {
     ensureClient(selectedClient);
-    clients[selectedClient].medication[index].done = !clients[selectedClient].medication[index].done;
+    clients[selectedClient].medication[i].done = !clients[selectedClient].medication[i].done;
     saveClients();
     renderApp();
   }
 
+  // --- Add medication ---
   function addMed() {
     const val = document.getElementById('newMed').value.trim();
-    if (!val) return;
+    if (!val) return alert('Vul een medicatienaam in.');
     ensureClient(selectedClient);
     clients[selectedClient].medication.push({ name: val, done: false });
     saveClients();
     renderApp();
+    document.getElementById('newMed').value = '';
   }
 
+  // --- Toggle task done ---
+  function toggleTask(i) {
+    ensureClient(selectedClient);
+    clients[selectedClient].tasks[i].done = !clients[selectedClient].tasks[i].done;
+    saveClients();
+    renderApp();
+  }
+
+  // --- Add task ---
   function addTask() {
     const val = document.getElementById('newTask').value.trim();
-    if (!val) return;
+    if (!val) return alert('Vul een taak in.');
     ensureClient(selectedClient);
     clients[selectedClient].tasks.push({ name: val, done: false });
     saveClients();
     renderApp();
+    document.getElementById('newTask').value = '';
+    // Scroll to tasks
     setTimeout(() => {
       const taskSection = document.getElementById('tasksSection');
       if (taskSection) {
         taskSection.scrollIntoView({ behavior: 'smooth' });
       }
-    }, 0);
+    }, 50);
   }
 
-  function toggleTask(index) {
-    ensureClient(selectedClient);
-    clients[selectedClient].tasks[index].done = !clients[selectedClient].tasks[index].done;
-    saveClients();
-    renderApp();
-  }
-
+  // --- Add activity ---
   function addActivity() {
     const name = document.getElementById('newActivity').value.trim();
     const datetime = document.getElementById('activityTime').value;
-    if (!name || !datetime) return;
+    if (!name) return alert('Vul een activiteit in.');
+    if (!datetime) return alert('Selecteer een datum en tijd.');
     ensureClient(selectedClient);
     clients[selectedClient].activities.push({ name, datetime });
     saveClients();
     renderApp();
+    document.getElementById('newActivity').value = '';
+    document.getElementById('activityTime').value = '';
   }
 
+  // --- Initial render ---
   if (!userLoggedIn) {
     renderLogin();
   } else {
     renderApp();
   }
 </script>
+
 </body>
 </html>
-
