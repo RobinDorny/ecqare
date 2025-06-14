@@ -3,422 +3,497 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ecqare Begeleidingsapp - Replica</title>
+<title>Ecqare Kloon</title>
 <style>
+  /* Basis reset en font */
+  * {
+    box-sizing: border-box;
+  }
   body {
-    margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
+    margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:#f0f4f8;
+    color:#333;
+    -webkit-font-smoothing: antialiased;
   }
   header {
-    background: #2c3e50;
+    background: #2272d9;
     color: white;
-    padding: 15px 20px;
+    padding: 15px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.15);
   }
-  #clientBar {
-    background: #ecf0f1;
-    padding: 10px 15px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-  }
-  #clientBar button {
-    padding: 8px 15px;
+  header button {
+    background: #0f54b0;
     border: none;
-    border-radius: 6px;
-    background: #bdc3c7;
-    cursor: pointer;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: background-color 0.3s;
-  }
-  #clientBar button.selected {
-    background: #3498db;
     color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.25s;
   }
-  #clientBar button:hover:not(.selected) {
-    background: #a5abb1;
+  header button:hover {
+    background: #0b3d7d;
   }
+  #clientTabs {
+    background: white;
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid #ddd;
+  }
+  #clientTabs button {
+    flex-shrink: 0;
+    padding: 12px 20px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: none;
+    font-weight: 600;
+    cursor: pointer;
+    color: #666;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  #clientTabs button.selected {
+    border-bottom-color: #2272d9;
+    color: #2272d9;
+    font-weight: 700;
+  }
+  #clientTabs button:hover {
+    color: #1a59c1;
+  }
+  #clientTabs button.addClientBtn {
+    color: #2272d9;
+    font-weight: 700;
+  }
+
   main {
     max-width: 900px;
     margin: 20px auto 40px;
-    padding: 0 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-  }
-  section {
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgb(0 0 0 / 0.1);
+    padding: 25px 35px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 25px;
+  }
+
+  section {
+    background: #fafafa;
     padding: 20px;
+    border-radius: 7px;
+    box-shadow: inset 0 0 8px rgb(0 0 0 / 0.05);
   }
-  h3 {
+  section h2 {
     margin-top: 0;
+    margin-bottom: 15px;
     font-weight: 700;
-    color: #2c3e50;
+    font-size: 1.2rem;
+    color: #1c1c1c;
+    border-bottom: 2px solid #2272d9;
+    padding-bottom: 6px;
   }
-  .list {
-    list-style-type: none;
+  ul.list {
+    list-style: none;
     padding-left: 0;
-    margin-top: 10px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 10px 0 0 0;
   }
-  .list li {
-    margin-bottom: 8px;
+  ul.list li {
+    padding: 7px 6px;
+    border-bottom: 1px solid #ddd;
     display: flex;
     align-items: center;
   }
-  .list li label {
-    cursor: pointer;
+  ul.list li:last-child {
+    border-bottom: none;
+  }
+  ul.list li label {
     flex-grow: 1;
-  }
-  input[type="checkbox"] {
-    transform: scale(1.3);
-    margin-right: 12px;
-  }
-  input[type="text"], input[type="datetime-local"], textarea {
-    width: 100%;
-    padding: 8px 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-family: inherit;
-    margin-top: 8px;
-    margin-bottom: 12px;
-    resize: vertical;
-  }
-  textarea {
-    min-height: 80px;
-  }
-  button {
-    background: #3498db;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-weight: 600;
-    padding: 10px 18px;
     cursor: pointer;
-    transition: background-color 0.3s;
-    user-select: none;
   }
-  button:hover {
-    background: #2980b9;
+  input[type=text], input[type=datetime-local], textarea {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px 12px;
+    margin-top: 10px;
+    border: 1.8px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.25s;
   }
-  /* Scrollbar for client bar */
-  #clientBar::-webkit-scrollbar {
-    height: 6px;
+  input[type=text]:focus, input[type=datetime-local]:focus, textarea:focus {
+    border-color: #2272d9;
+    outline: none;
   }
-  #clientBar::-webkit-scrollbar-track {
-    background: #ecf0f1;
+  button.addBtn {
+    background: #2272d9;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 10px 18px;
+    margin-top: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s;
+    width: 100%;
   }
-  #clientBar::-webkit-scrollbar-thumb {
-    background-color: #bdc3c7;
-    border-radius: 3px;
+  button.addBtn:hover {
+    background: #1a59c1;
   }
-  /* Login styles */
-  #loginMain {
-    max-width: 400px;
-    margin: 120px auto;
-    background: white;
-    padding: 30px 25px 35px;
+  /* Scrollbar styling */
+  ul.list::-webkit-scrollbar {
+    width: 7px;
+  }
+  ul.list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ul.list::-webkit-scrollbar-thumb {
+    background: #bbb;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-    text-align: center;
   }
-  #loginMain input {
-    font-size: 1.1rem;
+  ul.list::-webkit-scrollbar-thumb:hover {
+    background: #999;
   }
+
+  /* Dashboard taken sectie bovenaan - spanning over beide kolommen */
+  #dashboardTaken {
+    grid-column: 1 / 3;
+    background: #eaf6ff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgb(34 114 217 / 0.15);
+  }
+  #dashboardTaken h2 {
+    color: #0b3d7d;
+    border-bottom-color: #0b3d7d;
+  }
+  #dashboardTaken ul.list li {
+    color: #0b3d7d;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  /* Logout button header */
   #logoutBtn {
-    background: #e74c3c;
+    font-size: 0.9rem;
+    padding: 7px 15px;
   }
-  #logoutBtn:hover {
-    background: #c0392b;
+
+  /* Client toevoegen prompt */
+  #addClientModal {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content:center;
+    align-items:center;
+    z-index: 10;
   }
-  .dashboard-taken ul {
-    padding-left: 18px;
+  #addClientModal .modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 15px rgb(0 0 0 / 0.2);
   }
+  #addClientModal input[type=text] {
+    font-size: 1rem;
+  }
+  #addClientModal button {
+    margin-top: 15px;
+    width: 100%;
+  }
+
 </style>
 </head>
 <body>
 
-<div id="app"></div>
+<header>
+  <div>Ecqare Begeleidingsapp</div>
+  <button id="logoutBtn">Uitloggen</button>
+</header>
+
+<div id="clientTabs">
+  <button class="addClientBtn" title="Nieuwe cliënt toevoegen">+ Nieuwe cliënt</button>
+</div>
+
+<main>
+  <section id="dashboardTaken">
+    <h2>Taken vandaag</h2>
+    <ul class="list" id="todayTasksList"><li>Geen openstaande taken</li></ul>
+  </section>
+
+  <section id="sectionNotes">
+    <h2>Dossier & Notities</h2>
+    <p id="clientNotes">Geen notities</p>
+  </section>
+
+  <section id="sectionDiary">
+    <h2>Begeleidersdagboek</h2>
+    <textarea id="diaryText" rows="7" placeholder="Schrijf hier het begeleidersdagboek..."></textarea>
+    <button class="addBtn" id="saveDiaryBtn">Opslaan</button>
+  </section>
+
+  <section id="sectionMedication">
+    <h2>Medicatieplan</h2>
+    <ul class="list" id="medicationList"></ul>
+    <input type="text" id="newMedicationInput" placeholder="Medicatie toevoegen..." />
+    <button class="addBtn" id="addMedicationBtn">Toevoegen</button>
+  </section>
+
+  <section id="sectionTasks">
+    <h2>Takenlijst</h2>
+    <ul class="list" id="taskList"></ul>
+    <input type="text" id="newTaskInput" placeholder="Taak toevoegen..." />
+    <button class="addBtn" id="addTaskBtn">Toevoegen</button>
+  </section>
+
+  <section id="sectionActivities">
+    <h2>Activiteiten</h2>
+    <ul class="list" id="activityList"></ul>
+    <input type="text" id="newActivityInput" placeholder="Activiteit..." />
+    <input type="datetime-local" id="newActivityTime" />
+    <button class="addBtn" id="addActivityBtn">Toevoegen</button>
+  </section>
+</main>
 
 <script>
-  // --- Data and state ---
-  let userLoggedIn = localStorage.getItem('loggedIn') === 'true';
+  // Login system
+  let loggedIn = localStorage.getItem('loggedIn') === 'true';
   let clients = JSON.parse(localStorage.getItem('clients') || '[]');
-  let selectedClient = 0;
-
-  // --- Helper to save ---
-  function saveClients() {
+  let selectedClient = Number(localStorage.getItem('selectedClient'));
+  if (!clients.length) {
+    clients = [{
+      name: 'Voorbeeld cliënt',
+      diary: '',
+      notes: '',
+      medication: [],
+      tasks: [],
+      activities: []
+    }];
+    selectedClient = 0;
     localStorage.setItem('clients', JSON.stringify(clients));
+    localStorage.setItem('selectedClient', selectedClient);
+  }
+  if (isNaN(selectedClient) || selectedClient < 0 || selectedClient >= clients.length) {
+    selectedClient = 0;
   }
 
-  // --- Ensure client exists ---
-  function ensureClient(index) {
-    if (!clients[index]) {
-      clients[index] = {
-        name: 'Onbekend',
-        diary: '',
-        notes: '',
-        medication: [],
-        tasks: [],
-        activities: []
-      };
-      saveClients();
-    }
-  }
-
-  // --- Render login screen ---
-  function renderLogin() {
-    document.getElementById('app').innerHTML = `
-      <main id="loginMain">
-        <h2>Inloggen</h2>
-        <input type="password" id="password" placeholder="Wachtwoord" />
-        <br />
-        <button onclick="login()">Login</button>
-      </main>
-    `;
-  }
-
-  // --- Login ---
-  function login() {
-    const pwd = document.getElementById('password').value;
-    if (pwd === 'zorg') {
+  // Show login modal if not logged in
+  if (!loggedIn) {
+    const pw = prompt('Voer wachtwoord in om in te loggen');
+    if (pw === 'zorg') {
+      loggedIn = true;
       localStorage.setItem('loggedIn', 'true');
-      userLoggedIn = true;
-      renderApp();
     } else {
-      alert('Onjuist wachtwoord');
+      alert('Onjuist wachtwoord, pagina wordt gesloten');
+      document.body.innerHTML = '<h2 style="text-align:center;margin-top:100px;">Toegang geweigerd</h2>';
+      throw new Error('Not logged in');
     }
   }
 
-  // --- Logout ---
-  function logout() {
-    localStorage.setItem('loggedIn', 'false');
-    location.reload();
+  // Cache DOM elements
+  const logoutBtn = document.getElementById('logoutBtn');
+  const clientTabs = document.getElementById('clientTabs');
+  const diaryText = document.getElementById('diaryText');
+  const saveDiaryBtn = document.getElementById('saveDiaryBtn');
+  const clientNotes = document.getElementById('clientNotes');
+
+  const medicationList = document.getElementById('medicationList');
+  const newMedicationInput = document.getElementById('newMedicationInput');
+  const addMedicationBtn = document.getElementById('addMedicationBtn');
+
+  const taskList = document.getElementById('taskList');
+  const newTaskInput = document.getElementById('newTaskInput');
+  const addTaskBtn = document.getElementById('addTaskBtn');
+
+  const activityList = document.getElementById('activityList');
+  const newActivityInput = document.getElementById('newActivityInput');
+  const newActivityTime = document.getElementById('newActivityTime');
+  const addActivityBtn = document.getElementById('addActivityBtn');
+
+  const todayTasksList = document.getElementById('todayTasksList');
+
+  // Utility functions
+  function saveData() {
+    localStorage.setItem('clients', JSON.stringify(clients));
+    localStorage.setItem('selectedClient', selectedClient);
   }
 
-  // --- Render main app ---
-  function renderApp() {
-    if (!clients[selectedClient]) selectedClient = 0;
-    ensureClient(selectedClient);
-    const app = document.getElementById('app');
-    const client = clients[selectedClient];
-
-    // Taken van alle cliënten open (done==false)
-    const takenVandaag = clients.flatMap(c =>
-      (c.tasks || []).filter(t => !t.done).map(t => `• ${c.name}: ${t.name}`)
-    );
-
-    app.innerHTML = `
-      <header>
-        <div>Ecqare Begeleiding</div>
-        <button id="logoutBtn" onclick="logout()">Uitloggen</button>
-      </header>
-
-      <div id="clientBar">
-        <button onclick="addClient()">+ Nieuwe Cliënt</button>
-        ${clients.map((c, i) => `
-          <button class="${i === selectedClient ? 'selected' : ''}" onclick="selectClient(${i})">${c.name}</button>
-        `).join('')}
-      </div>
-
-      <main>
-        <section class="dashboard-taken">
-          <h3>Taken vandaag (openstaand)</h3>
-          ${takenVandaag.length ? `<ul>${takenVandaag.map(t => `<li>${t}</li>`).join('')}</ul>` : '<p>Geen openstaande taken</p>'}
-        </section>
-
-        <section>
-          <h3>Dossier: ${client.name}</h3>
-          <p><strong>Notities:</strong><br>${client.notes ? escapeHtml(client.notes).replace(/\n/g, '<br>') : 'Geen notities'}</p>
-        </section>
-
-        <section>
-          <h3>Begeleidersdagboek</h3>
-          <textarea id="diaryText" placeholder="Dagboeknotities...">${client.diary || ''}</textarea>
-          <button onclick="saveDiary()">Opslaan</button>
-        </section>
-
-        <section>
-          <h3>Medicatieplan</h3>
-          <ul class="list" id="medList">
-            ${(client.medication || []).map((m, i) => `
-              <li>
-                <label>
-                  <input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMed(${i})" />
-                  ${escapeHtml(m.name)}
-                </label>
-              </li>
-            `).join('')}
-          </ul>
-          <input type="text" id="newMed" placeholder="Medicatie toevoegen" />
-          <button onclick="addMed()">Toevoegen</button>
-        </section>
-
-        <section id="tasksSection">
-          <h3>Takenlijst</h3>
-          <ul class="list" id="taskList">
-            ${(client.tasks || []).map((t, i) => `
-              <li>
-                <label>
-                  <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" />
-                  ${escapeHtml(t.name)}
-                </label>
-              </li>
-            `).join('')}
-          </ul>
-          <input type="text" id="newTask" placeholder="Taak toevoegen" />
-          <button onclick="addTask()">Toevoegen</button>
-        </section>
-
-        <section>
-          <h3>Activiteiten</h3>
-          <ul class="list" id="activityList">
-            ${(client.activities || []).map((a, i) => `
-              <li>${escapeHtml(a.name)} — ${formatDateTime(a.datetime)}</li>
-            `).join('')}
-          </ul>
-          <input type="text" id="newActivity" placeholder="Activiteit" />
-          <input type="datetime-local" id="activityTime" />
-          <button onclick="addActivity()">Toevoegen</button>
-        </section>
-      </main>
-    `;
-  }
-
-  // --- Escape html to prevent XSS ---
-  function escapeHtml(text) {
-    return text.replace(/[&<>"']/g, function(m) {
-      return ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[m];
-    });
-  }
-
-  // --- Format datetime local string to readable NL date + time ---
-  function formatDateTime(dt) {
-    if (!dt) return '';
-    const d = new Date(dt);
-    if (isNaN(d)) return dt;
-    return d.toLocaleString('nl-NL', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-  }
-
-  // --- Select client ---
-  function selectClient(i) {
-    selectedClient = i;
-    renderApp();
-  }
-
-  // --- Add new client ---
-  function addClient() {
-    const name = prompt('Naam van cliënt:');
-    if (name && name.trim()) {
-      clients.push({
-        name: name.trim(),
-        diary: '',
-        notes: '',
-        medication: [],
-        tasks: [],
-        activities: []
+  function renderClientsTabs() {
+    clientTabs.querySelectorAll('button.clientTab').forEach(b => b.remove());
+    clients.forEach((client, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = client.name;
+      btn.className = 'clientTab';
+      if (i === selectedClient) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        selectedClient = i;
+        saveData();
+        renderApp();
       });
-      selectedClient = clients.length -1;
-      saveClients();
-      renderApp();
+      clientTabs.insertBefore(btn, clientTabs.querySelector('button.addClientBtn'));
+    });
+  }
+
+  function renderTodayTasks() {
+    const allPendingTasks = [];
+    clients.forEach(client => {
+      client.tasks.forEach(task => {
+        if (!task.done) {
+          allPendingTasks.push(`${client.name}: ${task.text}`);
+        }
+      });
+    });
+    todayTasksList.innerHTML = '';
+    if (!allPendingTasks.length) {
+      const li = document.createElement('li');
+      li.textContent = 'Geen openstaande taken';
+      todayTasksList.appendChild(li);
+      return;
     }
+    allPendingTasks.forEach(t => {
+      const li = document.createElement('li');
+      li.textContent = t;
+      todayTasksList.appendChild(li);
+    });
   }
 
-  // --- Save diary and notes ---
-  function saveDiary() {
-    const text = document.getElementById('diaryText').value;
-    ensureClient(selectedClient);
-    clients[selectedClient].diary = text;
-    clients[selectedClient].notes = text;
-    saveClients();
-    alert('Dagboek opgeslagen');
-    renderApp();
+  function renderClientNotes() {
+    let notes = clients[selectedClient].notes;
+    clientNotes.textContent = notes.trim() ? notes : 'Geen notities';
   }
 
-  // --- Toggle medication done ---
-  function toggleMed(i) {
-    ensureClient(selectedClient);
-    clients[selectedClient].medication[i].done = !clients[selectedClient].medication[i].done;
-    saveClients();
-    renderApp();
+  function renderDiary() {
+    diaryText.value = clients[selectedClient].diary || '';
   }
 
-  // --- Add medication ---
-  function addMed() {
-    const val = document.getElementById('newMed').value.trim();
-    if (!val) return alert('Vul een medicatienaam in.');
-    ensureClient(selectedClient);
-    clients[selectedClient].medication.push({ name: val, done: false });
-    saveClients();
-    renderApp();
-    document.getElementById('newMed').value = '';
+  function renderMedication() {
+    medicationList.innerHTML = '';
+    clients[selectedClient].medication.forEach((med, i) => {
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !!med.done;
+      checkbox.addEventListener('change', () => {
+        clients[selectedClient].medication[i].done = checkbox.checked;
+        saveData();
+      });
+      label.appendChild(checkbox);
+      label.append(` ${med.text}`);
+      li.appendChild(label);
+      medicationList.appendChild(li);
+    });
   }
 
-  // --- Toggle task done ---
-  function toggleTask(i) {
-    ensureClient(selectedClient);
-    clients[selectedClient].tasks[i].done = !clients[selectedClient].tasks[i].done;
-    saveClients();
-    renderApp();
+  function renderTasks() {
+    taskList.innerHTML = '';
+    clients[selectedClient].tasks.forEach((task, i) => {
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !!task.done;
+      checkbox.addEventListener('change', () => {
+        clients[selectedClient].tasks[i].done = checkbox.checked;
+        saveData();
+        renderTodayTasks();
+      });
+      label.appendChild(checkbox);
+      label.append(` ${task.text}`);
+      li.appendChild(label);
+      taskList.appendChild(li);
+    });
   }
 
-  // --- Add task ---
-  function addTask() {
-    const val = document.getElementById('newTask').value.trim();
-    if (!val) return alert('Vul een taak in.');
-    ensureClient(selectedClient);
-    clients[selectedClient].tasks.push({ name: val, done: false });
-    saveClients();
-    renderApp();
-    document.getElementById('newTask').value = '';
-    // Scroll to tasks
-    setTimeout(() => {
-      const taskSection = document.getElementById('tasksSection');
-      if (taskSection) {
-        taskSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 50);
+  function renderActivities() {
+    activityList.innerHTML = '';
+    clients[selectedClient].activities.forEach((act, i) => {
+      const li = document.createElement('li');
+      li.textContent = `${act.text} - ${new Date(act.time).toLocaleString()}`;
+      activityList.appendChild(li);
+    });
   }
 
-  // --- Add activity ---
-  function addActivity() {
-    const name = document.getElementById('newActivity').value.trim();
-    const datetime = document.getElementById('activityTime').value;
-    if (!name) return alert('Vul een activiteit in.');
-    if (!datetime) return alert('Selecteer een datum en tijd.');
-    ensureClient(selectedClient);
-    clients[selectedClient].activities.push({ name, datetime });
-    saveClients();
-    renderApp();
-    document.getElementById('newActivity').value = '';
-    document.getElementById('activityTime').value = '';
+  // Render alles
+  function renderApp() {
+    renderClientsTabs();
+    renderDiary();
+    renderClientNotes();
+    renderMedication();
+    renderTasks();
+    renderActivities();
+    renderTodayTasks();
   }
 
-  // --- Initial render ---
-  if (!userLoggedIn) {
-    renderLogin();
-  } else {
+  // Event listeners
+  addMedicationBtn.addEventListener('click', () => {
+    const text = newMedicationInput.value.trim();
+    if (!text) return alert('Vul medicatie in');
+    clients[selectedClient].medication.push({ text, done: false });
+    newMedicationInput.value = '';
+    saveData();
+    renderMedication();
+  });
+
+  addTaskBtn.addEventListener('click', () => {
+    const text = newTaskInput.value.trim();
+    if (!text) return alert('Vul een taak in');
+    clients[selectedClient].tasks.push({ text, done: false });
+    newTaskInput.value = '';
+    saveData();
+    renderTasks();
+    renderTodayTasks();
+  });
+
+  addActivityBtn.addEventListener('click', () => {
+    const text = newActivityInput.value.trim();
+    const time = newActivityTime.value;
+    if (!text || !time) return alert('Vul activiteit en tijd in');
+    clients[selectedClient].activities.push({ text, time });
+    newActivityInput.value = '';
+    newActivityTime.value = '';
+    saveData();
+    renderActivities();
+  });
+
+  saveDiaryBtn.addEventListener('click', () => {
+    clients[selectedClient].diary = diaryText.value;
+    saveData();
+    alert('Begeleidersdagboek opgeslagen');
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    if (confirm('Weet je zeker dat je wilt uitloggen?')) {
+      localStorage.removeItem('loggedIn');
+      location.reload();
+    }
+  });
+
+  clientTabs.querySelector('button.addClientBtn').addEventListener('click', () => {
+    const newName = prompt('Nieuwe cliënt naam:');
+    if (!newName || !newName.trim()) return;
+    clients.push({
+      name: newName.trim(),
+      diary: '',
+      notes: '',
+      medication: [],
+      tasks: [],
+      activities: []
+    });
+    selectedClient = clients.length - 1;
+    saveData();
     renderApp();
-  }
+  });
+
+  // Start
+  renderApp();
 </script>
 
 </body>
