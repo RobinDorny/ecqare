@@ -18,6 +18,9 @@
   .list { margin-top: 10px; }
   .list li { margin-bottom: 6px; }
   .dashboard-taken { background: #dff0d8; padding: 10px; border-radius: 8px; }
+  .client-tasks { display: flex; flex-wrap: wrap; gap: 10px; }
+  .client-block { flex: 1; min-width: 250px; background: #ffffff; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+  .client-block h4 { margin: 0 0 10px; }
 </style>
 </head>
 <body>
@@ -73,10 +76,6 @@
     const app = document.getElementById('app');
     const client = clients[selectedClient];
 
-    const takenVandaag = clients.flatMap((c, ci) =>
-      (c.tasks || []).filter(t => !t.done).map(t => `• ${c.name}: ${t.name}`)
-    );
-
     app.innerHTML = `
       <header>
         <div>Ecqare Begeleiding</div>
@@ -88,8 +87,14 @@
       </div>
       <main>
         <section class="dashboard-taken">
-          <h3>Taken vandaag</h3>
-          ${takenVandaag.length ? `<ul>${takenVandaag.map(t => `<li>${t}</li>`).join('')}</ul>` : '<p>Geen openstaande taken</p>'}
+          <h3>Taken vandaag per cliënt</h3>
+          <div class="client-tasks">
+            ${clients.map((c, ci) => `
+              <div class="client-block">
+                <h4>${c.name}</h4>
+                ${(c.tasks && c.tasks.length) ? `<ul>${c.tasks.filter(t => !t.done).map(t => `<li>${t.name}</li>`).join('')}</ul>` : '<p>Geen taken</p>'}
+              </div>`).join('')}
+          </div>
         </section>
 
         <section>
