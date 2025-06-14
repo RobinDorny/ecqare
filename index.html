@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ecqare</title>
+<title>Ecqare Begeleidingsapp</title>
 <style>
   body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
   header {
@@ -45,7 +45,6 @@
     grid-template-columns: 1fr 1fr;
     grid-gap: 25px;
   }
-  /* Taken vandaag over beide kolommen */
   #dashboardTaken {
     grid-column: 1 / 3;
     background: #dff0d8;
@@ -59,21 +58,13 @@
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-  /* Links: dossier en dagboek */
   #sectionNotes {
     grid-column: 1 / 2;
   }
   #sectionDiary {
     grid-column: 1 / 2;
   }
-  /* Rechts: medicatie, taken, activiteiten */
-  #sectionMedication {
-    grid-column: 2 / 3;
-  }
-  #sectionTasks {
-    grid-column: 2 / 3;
-  }
-  #sectionActivities {
+  #sectionMedication, #sectionTasks, #sectionActivities {
     grid-column: 2 / 3;
   }
   textarea, input[type=text], input[type=datetime-local] {
@@ -177,8 +168,7 @@
     const app = document.getElementById('app');
     const client = clients[selectedClient];
 
-    // Taken vandaag van alle cliënten die niet gedaan zijn
-    const takenVandaag = clients.flatMap((c) =>
+    const takenVandaag = clients.flatMap(c =>
       (c.tasks || []).filter(t => !t.done).map(t => `• ${c.name}: ${t.name}`)
     );
 
@@ -241,7 +231,13 @@
         <section id="sectionActivities">
           <h3>Activiteiten</h3>
           <ul class="list" id="activityList">
-            ${(client.activities || []).map((a, i) => `<li>${a.name} - ${a.datetime}</li>`).join('')}
+            ${(client.activities || []).map((a, i) => `
+              <li>
+                <label>
+                  <input type="checkbox" ${a.done ? 'checked' : ''} onchange="toggleActivity(${i})" />
+                  ${a.name} - ${a.datetime}
+                </label>
+              </li>`).join('')}
           </ul>
           <input type="text" id="newActivity" placeholder="Activiteit" />
           <input type="datetime-local" id="activityTime" />
@@ -293,6 +289,13 @@
     document.getElementById('newMed').value = '';
   }
 
+  function toggleTask(index) {
+    ensureClient(selectedClient);
+    clients[selectedClient].tasks[index].done = !clients[selectedClient].tasks[index].done;
+    saveClients();
+    renderApp();
+  }
+
   function addTask() {
     const val = document.getElementById('newTask').value.trim();
     if (!val) return;
@@ -303,9 +306,9 @@
     document.getElementById('newTask').value = '';
   }
 
-  function toggleTask(index) {
+  function toggleActivity(index) {
     ensureClient(selectedClient);
-    clients[selectedClient].tasks[index].done = !clients[selectedClient].tasks[index].done;
+    clients[selectedClient].activities[index].done = !clients[selectedClient].activities[index].done;
     saveClients();
     renderApp();
   }
@@ -315,14 +318,13 @@
     const datetime = document.getElementById('activityTime').value;
     if (!name || !datetime) return;
     ensureClient(selectedClient);
-    clients[selectedClient].activities.push({ name, datetime });
+    clients[selectedClient].activities.push({ name, datetime, done: false });
     saveClients();
     renderApp();
     document.getElementById('newActivity').value = '';
     document.getElementById('activityTime').value = '';
   }
 
-  // Start app
   if (!userLoggedIn) {
     renderLogin();
   } else {
@@ -331,4 +333,3 @@
 </script>
 </body>
 </html>
-
