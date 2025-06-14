@@ -1,4 +1,3 @@
-.*
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -91,55 +90,24 @@
     margin-right: 8px;
     cursor: pointer;
   }
-  #dashboardTasks {
-    background: #dff0d8;
-    padding: 15px;
-    border-radius: 8px;
-    max-height: 240px;
-    overflow-y: auto;
-  }
-  #dashboardTasks ul {
-    max-height: 100%;
-  }
-  #dashboardTasks p {
-    margin: 0;
-    color: #666;
-  }
-  /* Scrollbar styling for better UI */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #bdc3c7;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #ecf0f1;
-  }
 </style>
 </head>
 <body>
 <div id="app"></div>
 
 <script>
-  // State variables
-  let clients = JSON.parse(localStorage.getItem('clients') || '[]');
-  let loggedIn = localStorage.getItem('loggedIn') === 'true';
+  // Simpele data
+  let clients = [{
+    name: "Voorbeeld Cliënt",
+    notes: "",
+    diary: "",
+    medication: [],
+    tasks: [],
+    activities: []
+  }];
+  let loggedIn = false;
   let selectedClientIndex = 0;
 
-  // Save clients data to localStorage
-  function saveData() {
-    localStorage.setItem('clients', JSON.stringify(clients));
-  }
-
-  // Save login status
-  function setLoggedIn(status) {
-    loggedIn = status;
-    localStorage.setItem('loggedIn', status ? 'true' : 'false');
-  }
-
-  // Render login screen
   function renderLogin() {
     const app = document.getElementById('app');
     app.innerHTML = `
@@ -149,250 +117,61 @@
         <button id="loginBtn">Login</button>
       </main>
     `;
-    document.getElementById('loginBtn').onclick = login;
-    document.getElementById('passwordInput').addEventListener('keypress', e => {
-      if (e.key === 'Enter') login();
-    });
-  }
-
-  // Handle login
-  function login() {
-    const pwd = document.getElementById('passwordInput').value;
-    if (pwd === 'zorg') {
-      setLoggedIn(true);
-      if (clients.length === 0) {
-        // Add default client for first time
-        clients.push({
-          name: 'Voorbeeld Cliënt',
-          notes: '',
-          diary: '',
-          medication: [],
-          tasks: [],
-          activities: []
-        });
-        selectedClientIndex = 0;
-        saveData();
+    document.getElementById('loginBtn').onclick = () => {
+      if(document.getElementById('passwordInput').value === 'zorg') {
+        loggedIn = true;
+        renderApp();
+      } else {
+        alert('Onjuist wachtwoord');
       }
-      renderApp();
-    } else {
-      alert('Onjuist wachtwoord');
-    }
+    };
   }
 
-  // Logout user
-  function logout() {
-    setLoggedIn(false);
-    location.reload();
-  }
-
-  // Ensure client exists at index
-  function ensureClient(index) {
-    if (!clients[index]) {
-      clients[index] = {
-        name: 'Onbekend',
-        notes: '',
-        diary: '',
-        medication: [],
-        tasks: [],
-        activities: []
-      };
-      saveData();
-    }
-  }
-
-  // Add new client function (was missing)
-  function addClient() {
-    const newName = prompt('Naam van nieuwe cliënt:');
-    if (newName && newName.trim() !== '') {
-      clients.push({
-        name: newName.trim(),
-        notes: '',
-        diary: '',
-        medication: [],
-        tasks: [],
-        activities: []
-      });
-      selectedClientIndex = clients.length - 1;
-      saveData();
-      renderApp();
-    }
-  }
-
-  // Render main app
   function renderApp() {
-    ensureClient(selectedClientIndex);
-    const app = document.getElementById('app');
     const client = clients[selectedClientIndex];
-
-    // Gather all open tasks for dashboard
-    const openTasks = clients.flatMap((cl, ci) => 
-      (cl.tasks || []).filter(t => !t.done).map(t => `• ${cl.name}: ${t.name}`)
-    );
-
+    const app = document.getElementById('app');
     app.innerHTML = `
       <header>
         <div>Ecqare Begeleiding</div>
         <button id="logoutBtn">Uitloggen</button>
       </header>
       <div id="clientBar">
-        <button id="addClientBtn">+ Nieuwe Cliënt</button>
-        ${clients.map((c, i) => `
-          <button class="${i === selectedClientIndex ? 'selected' : ''}" data-index="${i}">
-            ${c.name}
-          </button>
-        `).join('')}
+        ${clients.map((c,i) => `<button class="${i === selectedClientIndex ? 'selected' : ''}" data-index="${i}">${c.name}</button>`).join('')}
       </div>
       <main>
-        <section id="dashboardTasks">
-          <h3>Taken vandaag</h3>
-          ${openTasks.length > 0 ? `<ul>${openTasks.map(t => `<li>${t}</li>`).join('')}</ul>` : '<p>Geen openstaande taken</p>'}
-        </section>
-
-        <section id="clientNotesSection">
+        <section>
           <h3>Dossier: ${client.name}</h3>
           <textarea id="clientNotesInput" placeholder="Notities...">${client.notes}</textarea>
           <button id="saveNotesBtn">Notities opslaan</button>
         </section>
-
-        <section id="diarySection">
+        <section>
           <h3>Begeleidersdagboek</h3>
           <textarea id="diaryInput" placeholder="Dagboek...">${client.diary}</textarea>
           <button id="saveDiaryBtn">Dagboek opslaan</button>
         </section>
-
-        <section id="medicationSection">
-          <h3>Medicatieplan</h3>
-          <ul id="medicationList">
-            ${client.medication.map((m,i) => `
-              <li><input type="checkbox" id="med_${i}" ${m.done ? 'checked' : ''} data-index="${i}" /> 
-              <label for="med_${i}">${m.name}</label></li>
-            `).join('')}
-          </ul>
-          <input type="text" id="newMedication" placeholder="Medicatie toevoegen" autocomplete="off" />
-          <button id="addMedicationBtn">Toevoegen</button>
-        </section>
-
-        <section id="tasksSection">
-          <h3>Takenlijst</h3>
-          <ul id="tasksList">
-            ${client.tasks.map((t,i) => `
-              <li><input type="checkbox" id="task_${i}" ${t.done ? 'checked' : ''} data-index="${i}" />
-              <label for="task_${i}">${t.name}</label></li>
-            `).join('')}
-          </ul>
-          <input type="text" id="newTask" placeholder="Taak toevoegen" autocomplete="off" />
-          <button id="addTaskBtn">Toevoegen</button>
-        </section>
-
-        <section id="activitiesSection">
-          <h3>Activiteiten</h3>
-          <ul id="activitiesList">
-            ${client.activities.map((a,i) => `
-              <li>${a.name} - ${a.datetime.replace('T',' ')}</li>
-            `).join('')}
-          </ul>
-          <input type="text" id="newActivity" placeholder="Activiteit" autocomplete="off" />
-          <input type="datetime-local" id="newActivityDate" />
-          <button id="addActivityBtn">Toevoegen</button>
-        </section>
       </main>
     `;
-
-    // Event listeners after render
-    document.getElementById('logoutBtn').onclick = logout;
-    document.getElementById('addClientBtn').onclick = addClient;
-
-    // Client buttons
-    document.querySelectorAll('#clientBar button[data-index]').forEach(btn => {
+    document.getElementById('logoutBtn').onclick = () => {
+      loggedIn = false;
+      renderLogin();
+    };
+    document.querySelectorAll('#clientBar button').forEach(btn => {
       btn.onclick = () => {
         selectedClientIndex = Number(btn.dataset.index);
         renderApp();
       };
     });
-
-    // Save notes
     document.getElementById('saveNotesBtn').onclick = () => {
-      clients[selectedClientIndex].notes = document.getElementById('clientNotesInput').value.trim();
-      saveData();
+      clients[selectedClientIndex].notes = document.getElementById('clientNotesInput').value;
       alert('Notities opgeslagen');
     };
-
-    // Save diary
     document.getElementById('saveDiaryBtn').onclick = () => {
-      clients[selectedClientIndex].diary = document.getElementById('diaryInput').value.trim();
-      saveData();
+      clients[selectedClientIndex].diary = document.getElementById('diaryInput').value;
       alert('Dagboek opgeslagen');
-    };
-
-    // Medication toggles
-    document.querySelectorAll('#medicationList input[type=checkbox]').forEach(checkbox => {
-      checkbox.onchange = () => {
-        const idx = Number(checkbox.dataset.index);
-        clients[selectedClientIndex].medication[idx].done = checkbox.checked;
-        saveData();
-      };
-    });
-
-    // Add medication
-    document.getElementById('addMedicationBtn').onclick = () => {
-      const val = document.getElementById('newMedication').value.trim();
-      if (val) {
-        clients[selectedClientIndex].medication.push({name: val, done: false});
-        document.getElementById('newMedication').value = '';
-        saveData();
-        renderApp();
-      }
-    };
-
-    // Task toggles
-    document.querySelectorAll('#tasksList input[type=checkbox]').forEach(checkbox => {
-      checkbox.onchange = () => {
-        const idx = Number(checkbox.dataset.index);
-        clients[selectedClientIndex].tasks[idx].done = checkbox.checked;
-        saveData();
-      };
-    });
-
-    // Add task
-    document.getElementById('addTaskBtn').onclick = () => {
-      const val = document.getElementById('newTask').value.trim();
-      if (val) {
-        clients[selectedClientIndex].tasks.push({name: val, done: false});
-        document.getElementById('newTask').value = '';
-        saveData();
-        renderApp();
-      }
-    };
-
-    // Add activity
-    document.getElementById('addActivityBtn').onclick = () => {
-      const name = document.getElementById('newActivity').value.trim();
-      const datetime = document.getElementById('newActivityDate').value;
-      if (name && datetime) {
-        clients[selectedClientIndex].activities.push({name, datetime});
-        document.getElementById('newActivity').value = '';
-        document.getElementById('newActivityDate').value = '';
-        saveData();
-        renderApp();
-      } else {
-        alert('Vul een activiteit en datum/tijd in.');
-      }
     };
   }
 
-  // On page load:
-  if (loggedIn) {
-    if (clients.length === 0) {
-      clients.push({
-        name: 'Voorbeeld Cliënt',
-        notes: '',
-        diary: '',
-        medication: [],
-        tasks: [],
-        activities: []
-      });
-      saveData();
-    }
+  if(loggedIn) {
     renderApp();
   } else {
     renderLogin();
@@ -400,4 +179,3 @@
 </script>
 </body>
 </html>
-
